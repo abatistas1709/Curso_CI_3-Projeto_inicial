@@ -1,0 +1,26 @@
+name: Entrega contínua
+
+on:
+  workflow_call:
+
+jobs:
+
+  EC2:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Download main compilado
+      uses: actions/download-artifact@v3
+      with:
+        name: programa
+
+    - uses: actions/checkout@v3
+
+    - name: ssh deploy
+      uses: easingthemes/ssh-deploy@v2.2.11
+      with:
+        SSH_PRIVATE_KEY: 
+        REMOTE_HOST: 
+        REMOTE_USER: 
+        TARGET: 
+        EXCLUDE:
