@@ -34,7 +34,7 @@ jobs:
         port: 22
         script: |
           export HOST=${{ secrets.DBHOST }}
-          export PORT=${{ secrets.DBPORT }}
+          export DBPORT=${{ secrets.DBPORT }}
           export USER=${{ secrets.DBUSER }}
           export PASSWORD=${{ secrets.DBPASSWORD }}
           export DBNAME=${{ secrets.DBNAME }}
