@@ -30,4 +30,4 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tags: abatistas/cursoci2:latest
+        tags: abatistas/cursoci2:${{ github.run_number }}
