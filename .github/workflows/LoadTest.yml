@@ -23,6 +23,9 @@ jobs:
       - name: HashiCorp - Setup terraform
         uses: hashicorp/setup-terraform@v2.0.3
 
+      - name: Limpa o cache de módulos do Terraform
+        run: rm -rf .terraform && rm -f .terraform.lock.hcl
+
       - name: Inicializando Terraform
         run: terraform -chdir=Infra_CI/env/Homolog init
 
