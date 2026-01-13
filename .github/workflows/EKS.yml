@@ -26,5 +26,8 @@ jobs:
       - name: Inicializando Terraform
         run: terraform -chdir=Infra_CI_EKS/env/Homolog init
 
+      - run: terraform -chdir=Infra_CI_EKS/env/Homolog destroy -auto-approve
+      - run: return 1
+
       - name: Aplicando configuração Terraform
         run: terraform -chdir=Infra_CI_EKS/env/Homolog apply -auto-approve
