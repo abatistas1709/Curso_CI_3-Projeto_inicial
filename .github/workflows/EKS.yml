@@ -26,8 +26,20 @@ jobs:
       - name: Inicializando Terraform
         run: terraform -chdir=Infra_CI_EKS/env/Homolog init
 
-      - run: terraform -chdir=Infra_CI_EKS/env/Homolog destroy -auto-approve
-      - run: return 1
+      # - run: terraform -chdir=Infra_CI_EKS/env/Homolog destroy -auto-approve
+      # - run: return 1
 
       - name: Aplicando configuração Terraform
         run: terraform -chdir=Infra_CI_EKS/env/Homolog apply -auto-approve
+
+      - name: Kubectl tool installer
+        uses: Azure/setup-kubectl@v3
+
+      - name: Verifica qual identidade está autenticada na CLI da AWS
+        run: aws sts get-caller-identity
+
+      - name: Atualiza configuração do kubeconfig
+        run: aws eks update-kubeconfig --region us-east-1 --name study-cluster
+
+      - name: Listando serviços no cluster EKS
+        run: kubectl get svc
