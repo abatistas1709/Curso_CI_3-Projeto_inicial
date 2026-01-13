@@ -18,13 +18,13 @@ jobs:
           aws-region: us-east-2
 
       - name: Clonando repositório Infra_CI
-        run: git clone https://github.com/abatistas1709/Infra_CI_Kubernetes
+        run: git clone https://github.com/abatistas1709/Infra_CI_EKS
 
       - name: HashiCorp - Setup terraform
         uses: hashicorp/setup-terraform@v2.0.3
 
       - name: Inicializando Terraform
-        run: terraform -chdir=Infra_CI_Kubernetes/env/Homolog init
+        run: terraform -chdir=Infra_CI_EKS/env/Homolog init
 
       - name: Aplicando configuração Terraform
-        run: terraform -chdir=Infra_CI_Kubernetes/env/Homolog apply -auto-approve
+        run: terraform -chdir=Infra_CI_EKS/env/Homolog apply -auto-approve
