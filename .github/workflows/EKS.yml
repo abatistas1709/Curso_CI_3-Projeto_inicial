@@ -32,6 +32,10 @@ jobs:
       - name: Aplicando configuração Terraform
         run: terraform -chdir=Infra_CI_EKS/env/Homolog apply -auto-approve
 
+      - name: Recupera IP do Banco de Dados
+        id: get_db_ip
+        run: echo "$(terraform -chdir=Infra_CI_EKS/env/Homolog output -raw rds_IP)"
+
       - name: Kubectl tool installer
         uses: Azure/setup-kubectl@v3
 
@@ -43,3 +47,18 @@ jobs:
 
       - name: Listando serviços no cluster EKS
         run: kubectl get svc
+
+      - name: Criando segredos
+        run: |
+          kubectl create secret generic dbhost --from-literal=HOST=${{ steps.get_db_ip.outputs.stdout }}
+          kubectl create secret generic dbport --from-literal=DBPORT=${{ secrets.DBPORT }}
+          kubectl create secret generic dbuser --from-literal=USER=${{ secrets.DBUSER }}
+          kubectl create secret generic dbpassword --from-literal=PASSWORD=${{ secrets.DBPASSWORD }}
+          kubectl create secret generic dbname --from-literal=DBNAME=${{ secrets.DBNAME }}
+          kubectl create secret generic port --from-literal=PORT=8000
+
+      - name: Iniciando aplicação no EKS
+        run: kubectl apply -f Infra_CI_EKS/go.yaml
+
+      - name: Atualizando imagem do deployment
+        run: kubectl set image deployment/go-api go=abatistas/cursoci2:${{ github.run_number }}
