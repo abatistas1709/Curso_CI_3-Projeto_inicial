@@ -1,0 +1,64 @@
+name: kubernetes
+
+on:
+  workflow_call:
+
+jobs:
+
+  EKS:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Configurando credenciais da AWS
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      - name: Clonando repositório Infra_CI
+        run: git clone https://github.com/abatistas1709/Infra_CI_EKS
+
+      - name: HashiCorp - Setup terraform
+        uses: hashicorp/setup-terraform@v2.0.3
+
+      - name: Inicializando Terraform
+        run: terraform -chdir=Infra_CI_EKS/env/Homolog init
+
+      # - run: terraform -chdir=Infra_CI_EKS/env/Homolog destroy -auto-approve
+      # - run: return 1
+
+      - name: Aplicando configuração Terraform
+        run: terraform -chdir=Infra_CI_EKS/env/Homolog apply -auto-approve
+
+      - name: Recupera IP do Banco de Dados
+        id: get_db_ip
+        run: echo "$(terraform -chdir=Infra_CI_EKS/env/Homolog output -raw rds_IP)"
+
+      - name: Kubectl tool installer
+        uses: Azure/setup-kubectl@v3
+
+      - name: Verifica qual identidade está autenticada na CLI da AWS
+        run: aws sts get-caller-identity
+
+      - name: Atualiza configuração do kubeconfig
+        run: aws eks update-kubeconfig --region us-east-1 --name study-cluster
+
+      - name: Listando serviços no cluster EKS
+        run: kubectl get svc
+
+      - name: Criando segredos
+        run: |
+          kubectl create secret generic dbhost --from-literal=HOST=${{ steps.get_db_ip.outputs.stdout }}
+          kubectl create secret generic dbport --from-literal=DBPORT=${{ secrets.DBPORT }}
+          kubectl create secret generic dbuser --from-literal=USER=${{ secrets.DBUSER }}
+          kubectl create secret generic dbpassword --from-literal=PASSWORD=${{ secrets.DBPASSWORD }}
+          kubectl create secret generic dbname --from-literal=DBNAME=${{ secrets.DBNAME }}
+          kubectl create secret generic port --from-literal=PORT=8000
+
+      - name: Iniciando aplicação no EKS
+        run: kubectl apply -f Infra_CI_EKS/go.yaml
+
+      - name: Atualizando imagem do deployment
+        run: kubectl set image deployment/go-api go=abatistas/cursoci2:${{ github.run_number }}
