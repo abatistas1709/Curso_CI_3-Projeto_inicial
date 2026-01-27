@@ -139,4 +139,5 @@ Não deve ser utilizado diretamente em ambientes produtivos sem as devidas adapt
 ## 👤 Autor
 
 Alexandre Batista da Silva
+
 Profissional com experiência em infraestrutura, cloud computing e práticas DevOps, em constante evolução na área de automação, CI/CD e plataformas em nuvem.
